@@ -14,4 +14,4 @@ RUN apt-get update -qq && \
     datalad wtf
 
 COPY ./entrypoint.sh /entrypoint.sh
-ENTRYPOINT /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
