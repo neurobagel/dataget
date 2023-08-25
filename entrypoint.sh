@@ -13,7 +13,6 @@ export -f getit
 [ ! -e ${out} ] && mkdir -p ${out}
 
 {
-    read
     while read -r line;
     do
 
