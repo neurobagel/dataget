@@ -13,8 +13,9 @@ export -f getit
 [ ! -e ${out} ] && mkdir -p ${out}
 
 {
-    read
-    while read -r dataset;
+    # Ensure last line is read even if file does not end with newline
+    # See: https://stackoverflow.com/a/12916758
+    while read -r dataset || [ -n "$dataset" ];
     do
 
         ds_id=$(cut -f1 <<< $dataset)
