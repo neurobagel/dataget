@@ -13,11 +13,14 @@ export -f getit
 [ ! -e ${out} ] && mkdir -p ${out}
 
 {
-    while read -r line;
+    read
+    while read -r dataset;
     do
 
-        ds_id=$(cut -f1 <<< $line)
-        ds_url=$(cut -f3 <<< $line)
+        ds_id=$(cut -f1 <<< $dataset)
+        ds_url=$(cut -f3 <<< $dataset)
+
+        echo Will now install ${ds_id} from ${ds_url}.
 
         (
             cd ${out}
