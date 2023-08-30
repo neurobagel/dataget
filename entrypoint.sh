@@ -13,6 +13,8 @@ export -f getit
 [ ! -e ${out} ] && mkdir -p ${out}
 
 {
+    # We need to read the first line and discard it to skip the header row
+    read
     # Ensure last line is read even if file does not end with newline
     # See: https://stackoverflow.com/a/12916758
     while read -r dataset || [ -n "$dataset" ];
