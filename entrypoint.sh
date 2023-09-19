@@ -21,9 +21,10 @@ export -f getit
     do
 
         ds_id=$(cut -f1 <<< $dataset)
+        ds_full_name=$(cut -f2 <<< $dataset)
         ds_url=$(cut -f3 <<< $dataset)
 
-        echo Will now install ${ds_id} from ${ds_url}.
+        echo Will now install "'"${ds_full_name}"'" from ${ds_url}.
 
         (
             cd ${out}
