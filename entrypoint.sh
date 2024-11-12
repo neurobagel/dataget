@@ -31,7 +31,7 @@ export -f getit
             datalad install ${ds_url}
         )
 
-        for ses in $(grep $ds_id ${participant_f} | cut -f8);
+        for ses in $(grep $ds_id ${participant_f} | cut -f9);
         do
             ds_name=$( echo $ses | cut -d "/" -f2)
             ses_path=$( echo $ses | cut -d "/" -f3-)
