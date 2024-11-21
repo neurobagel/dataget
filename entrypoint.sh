@@ -1,48 +1,56 @@
 #!/bin/bash
+# Example usage:
+# ./entrypoint.sh <machine_f> [<output_dir>] [<number_of_jobs>]
+
+# The <machine_f> is the path to the cohort-participant-machine-results.tsv file downloaded from the neurobagel query tool.
+
+# The <output_dir> is an optional argument that specifies where the datasets should be installed.
+# If not provided, the current directory will be used.
+
+# The <number_of_jobs> is an optional argument that specifies the number of parallel jobs to run.
+# If not provided, the default value of 6 will be used.
 
 machine_f=$1
-out=${2-.}
+output_dir=${2-.}
 jobs=${3-6}
 
-getit() {
-    datalad get --dataset $(cut -d " " -f1 <<< $1) $(cut -d " " -f2 <<< $1)
+getdata() {
+    dataset=$(cut -d " " -f1 <<< "$1")
+    content=$(cut -d " " -f2 <<< "$1")
+    datalad get --dataset "$dataset" "$content"
 }
-export -f getit
+export -f getdata
 
-[ ! -e ${out} ] && mkdir -p ${out}
+[ ! -e ${output_dir} ] && mkdir -p ${output_dir}
 
-installed_datasets=()
+# dataset installations
+cut -f1,2 "$machine_f" | sort | uniq | parallel -j"${jobs}" --joblog "${output_dir}/parallel.log" --bar "
+  ds_full_name=\$(cut -f1 <<< {})
+  ds_url=\$(cut -f2 <<< {})
+  echo \"Will now install '\$ds_full_name' from '\$ds_url'.\"
+  (
+    cd \"${output_dir}\" || exit
+    datalad install \"\$ds_url\"
+  )
+" ::: 2>&1 | tee -a "${output_dir}/parallel.outs"
 
+# session processing
 {
     # Skip the header row of the machine_f file
     read
+    # Ensure last line is read even if file does not end with newline
+    # See: https://stackoverflow.com/a/12916758
     while read -r dataset || [ -n "$dataset" ]; do
 
         ds_full_name=$(cut -f1 <<< "$dataset")
         ds_url=$(cut -f2 <<< "$dataset")
-        ses=$(cut -f5 <<< "$dataset")
+        ses_path=$(cut -f5 <<< "$dataset")
 
-        # Check if dataset is already installed
-        if [[ ! " ${installed_datasets[@]} " =~ " ${ds_url} " ]]; then
-            echo "Will now install '${ds_full_name}' from ${ds_url}."
-
-            (
-                cd "${out}"
-                datalad install "${ds_url}"
-            )
-
-            # Mark this dataset as installed
-            installed_datasets+=("${ds_url}")
-        else
-            echo "Dataset '${ds_full_name}' from ${ds_url} is already installed. Skipping."
-        fi
-
-        # Process session paths
-        for ses_path in $ses; do
+        if [ -n "$ses_path" ]; then
             ds_name=$(echo "$ses_path" | cut -d "/" -f2)
             ses_subpath=$(echo "$ses_path" | cut -d "/" -f3-)
-            echo "${out}/${ds_name} ${out}/${ds_name}/${ses_subpath}"
-        done | parallel -j"${jobs}" --jl "${out}/parallel.log" getit ::: 2>&1 | tee -a "${out}/parallel.outs"
+            getdata "${output_dir}/${ds_name} ${output_dir}/${ds_name}/${ses_subpath}"
+        fi
 
     done
-} < "${machine_f}"
+} < "$machine_f" | parallel -j"${jobs}" --joblog "${output_dir}/parallel.log" --bar "getdata {}" ::: 2>&1 | tee "${output_dir}/parallel.outs"
