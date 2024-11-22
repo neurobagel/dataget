@@ -53,3 +53,5 @@ tail -n +2 "$machine_f" | cut -f1,2 | sort | uniq | parallel -j"${jobs}" --joblo
 
     done | parallel -j"${jobs}" --joblog "${output_dir}/parallel.log" "getdata {}" ::: 2>&1 | tee "${output_dir}/parallel.outs"
 } < "$machine_f"
+
+echo "Finished getting all files for the matching subject(s)/session(s) from DataLad."
