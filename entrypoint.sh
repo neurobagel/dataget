@@ -24,9 +24,10 @@ export -f getdata
 [ ! -e ${output_dir} ] && mkdir -p ${output_dir}
 
 # dataset installations
-cut -f1,2 "$machine_f" | sort | uniq | parallel -j"${jobs}" --joblog "${output_dir}/parallel.log" --bar "
+tail -n +2 "$machine_f" | cut -f1,2 | sort | uniq | parallel -j"${jobs}" --joblog "${output_dir}/parallel.log" "
   ds_full_name=\$(cut -f1 <<< {})
   ds_url=\$(cut -f2 <<< {})
+  # NOTE: ds_full_name and ds_url references must be unbraced to ensure they aren't expanded in the parent shell
   echo \"Will now install '\$ds_full_name' from '\$ds_url'.\"
   (
     cd \"${output_dir}\" || exit
@@ -42,15 +43,13 @@ cut -f1,2 "$machine_f" | sort | uniq | parallel -j"${jobs}" --joblog "${output_d
     # See: https://stackoverflow.com/a/12916758
     while read -r dataset || [ -n "$dataset" ]; do
 
-        ds_full_name=$(cut -f1 <<< "$dataset")
-        ds_url=$(cut -f2 <<< "$dataset")
         ses_path=$(cut -f5 <<< "$dataset")
 
         if [ -n "$ses_path" ]; then
             ds_name=$(echo "$ses_path" | cut -d "/" -f2)
             ses_subpath=$(echo "$ses_path" | cut -d "/" -f3-)
-            getdata "${output_dir}/${ds_name} ${output_dir}/${ds_name}/${ses_subpath}"
+            echo "${output_dir}/${ds_name} ${output_dir}/${ds_name}/${ses_subpath}"
         fi
 
-    done
-} < "$machine_f" | parallel -j"${jobs}" --joblog "${output_dir}/parallel.log" --bar "getdata {}" ::: 2>&1 | tee "${output_dir}/parallel.outs"
+    done | parallel -j"${jobs}" --joblog "${output_dir}/parallel.log" "getdata {}" ::: 2>&1 | tee "${output_dir}/parallel.outs"
+} < "$machine_f"
