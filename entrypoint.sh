@@ -1,8 +1,8 @@
 #!/bin/bash
 # Example usage:
-# ./entrypoint.sh <machine_f> [<output_dir>] [<number_of_jobs>]
+# ./entrypoint.sh <cohort_result_f> [<output_dir>] [<number_of_jobs>]
 
-# The <machine_f> is the path to the cohort-participant-machine-results.tsv file downloaded from the neurobagel query tool.
+# The <cohort_result_f> is the path to the cohort-participant-machine-results.tsv file downloaded from the neurobagel query tool.
 
 # The <output_dir> is an optional argument that specifies where the datasets should be installed.
 # If not provided, the current directory will be used.
@@ -10,7 +10,7 @@
 # The <number_of_jobs> is an optional argument that specifies the number of parallel jobs to run.
 # If not provided, the default value of 6 will be used.
 
-machine_f=$1
+cohort_result_f=$1
 output_dir=${2-.}
 jobs=${3-6}
 
@@ -24,7 +24,7 @@ export -f getdata
 [ ! -e ${output_dir} ] && mkdir -p ${output_dir}
 
 # dataset installations
-tail -n +2 "$machine_f" | cut -f1,2 | sort | uniq | parallel -j"${jobs}" --joblog "${output_dir}/parallel.log" "
+tail -n +2 "$cohort_result_f" | cut -f1,2 | sort | uniq | parallel -j"${jobs}" --joblog "${output_dir}/parallel.log" "
   ds_full_name=\$(cut -f1 <<< {})
   ds_url=\$(cut -f2 <<< {})
   # NOTE: ds_full_name and ds_url references must be unbraced to ensure they aren't expanded in the parent shell
@@ -37,7 +37,7 @@ tail -n +2 "$machine_f" | cut -f1,2 | sort | uniq | parallel -j"${jobs}" --joblo
 
 # session processing
 {
-    # Skip the header row of the machine_f file
+    # Skip the header row of the cohort_result_f file
     read
     # Ensure last line is read even if file does not end with newline
     # See: https://stackoverflow.com/a/12916758
@@ -52,6 +52,6 @@ tail -n +2 "$machine_f" | cut -f1,2 | sort | uniq | parallel -j"${jobs}" --joblo
         fi
 
     done | parallel -j"${jobs}" --joblog "${output_dir}/parallel.log" "getdata {}" ::: 2>&1 | tee "${output_dir}/parallel.outs"
-} < "$machine_f"
+} < "$cohort_result_f"
 
 echo "Finished getting all files for the matching subject(s)/session(s) from DataLad."
