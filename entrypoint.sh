@@ -43,7 +43,7 @@ tail -n +2 "$machine_f" | cut -f1,2 | sort | uniq | parallel -j"${jobs}" --joblo
     # See: https://stackoverflow.com/a/12916758
     while read -r dataset || [ -n "$dataset" ]; do
 
-        ses_path=$(cut -f5 <<< "$dataset")
+        ses_path=$(cut -f6 <<< "$dataset")
 
         if [ -n "$ses_path" ]; then
             ds_name=$(echo "$ses_path" | cut -d "/" -f2)
