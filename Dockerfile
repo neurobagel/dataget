@@ -2,7 +2,7 @@ FROM python:3.10.9-bullseye
 
 ARG DEBIAN_FRONTEND="noninteractive"
 
-ARG USERNAME=bagel_user
+ARG USERNAME=neurobagel_user
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
@@ -28,7 +28,7 @@ RUN chown $USERNAME:$USERNAME /entrypoint.sh
 USER $USERNAME
 
 # setup git
-RUN git config --global user.email "bageluser@neuroabgel.org" && \
-    git config --global user.name "Bagel User"
+RUN git config --global user.email "user@neurobagel.org" && \
+    git config --global user.name "Neurobagel User"
 
 ENTRYPOINT ["/entrypoint.sh"]
