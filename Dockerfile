@@ -23,8 +23,9 @@ RUN apt-get update -qq && \
 
 COPY ./entrypoint.sh /entrypoint.sh
 
-# Change ownership of the entrypoint script
-RUN chown $USERNAME:$USERNAME /entrypoint.sh
+# Give all users permission to execute the entrypoint
+RUN chmod +x /entrypoint.sh 
+
 USER $USERNAME
 
 # setup git
