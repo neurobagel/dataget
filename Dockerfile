@@ -2,13 +2,16 @@ FROM python:3.10.9-bullseye
 
 ARG DEBIAN_FRONTEND="noninteractive"
 
-ARG USERNAME=bagel_user
+ARG USERNAME=neurobagel_user
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
-# Create the user
-RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
+# We create a new, non-root user to run datalad in the container
+# we also create a new group with the same name as the user
+# A user can overwrite the user name and group by running the 
+# docker run command with the -u flag: https://docs.docker.com/reference/cli/docker/container/run/
+RUN groupadd --gid $USER_GID $USERNAME && \
+    useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
 
 # install datalad
 RUN apt-get update -qq && \
