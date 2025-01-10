@@ -7,7 +7,9 @@ ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
 # We create a new, non-root user to run datalad in the container
-# we also create a new group with the same name as the user
+# we also create a new group with the same name as the user.
+# We chose the user id and group id to be 1000, which is the default
+# user id for the first user created on a linux system.
 # A user can overwrite the user name and group by running the 
 # docker run command with the -u flag: https://docs.docker.com/reference/cli/docker/container/run/
 RUN groupadd --gid $USER_GID $USERNAME && \
