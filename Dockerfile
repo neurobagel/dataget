@@ -9,9 +9,11 @@ RUN apt-get update -qq && \
     rm -rf /var/lib/apt/lists/* && \
     pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir datalad && \
-    git config --global --add user.name 'Ford Escort' && \
-    git config --global --add user.email 42@H2G2.com && \
     datalad wtf
 
+# We must allow write permission to the /.cache directory
+# for any user that runs the container
+RUN mkdir -p /.cache && chmod ugo+rw /.cache
+
 COPY ./entrypoint.sh /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]   
