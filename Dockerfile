@@ -13,7 +13,7 @@ RUN apt-get update -qq && \
 
 # We must allow write permission to the /.cache directory
 # for any user that runs the container
-RUN mkdir -p /.cache && chmod 777 /.cache
+RUN mkdir -p /.cache && chmod +w /.cache
 
 COPY ./entrypoint.sh /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]   
